@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkish Cargo Dijitalleşme Benchmarkı</title>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* KURUMSAL RENK PALETİ - GÜNCELLENMİŞ (#850101) */
+        :root {
+            --tk-bordo: #850101;    /* İstenen Yeni Renk */
+            --tk-navy: #05014A;     /* Koyu Lacivert */
+            --tk-grey: #635F5F;     /* Gri */
+            --bg-light: #F3F4F6;    /* Açık Gri Zemin */
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-light);
+            color: #333;
+        }
+        
+        /* Özel Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #8e8e8e; 
+            border-radius: 3px;
+        }
+
+        /* Kart Hover Efekti */
+        .hover-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .hover-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: var(--tk-bordo);
+        }
+        
+        /* Sidebar Link Active State */
+        .sidebar-link-active {
+            background-color: white !important;
+            color: var(--tk-bordo) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Select styling override */
+        select option {
+            background-color: white;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // ----------------------------------------------------------------
+        // GÜNCELLENMİŞ VERİ SETİ
+        // Yeni Eklenen Kategori: Yer İşletme Çözümleri (Turkish Airlines)
+        // ----------------------------------------------------------------
+        const rawData = [
+            // --- YENİ EKLENEN YER İŞLETME ÇÖZÜMLERİ (Turkish Airlines) ---
+            { id: 1201, company: "Turkish Airlines", product: "W&B (Weight & Balance)", subCategory: "Operasyonel Verimlilik", category: "Yer İşletme Çözümleri", description: "Uçakların ağırlık ve denge hesaplarını manuel süreçlerden çıkarıp tamamen otomatik hale getirmeyi amaçlar. Maksimum verimle yük taşınması sağlanır.", link: "#" },
+            { id: 1202, company: "Turkish Airlines", product: "Turnaround AI", subCategory: "Yapay Zeka", category: "Yer İşletme Çözümleri", description: "Uçağın yere inişinden kalkışına kadar geçen süreçteki aktiviteler (yakıt, temizlik, ikram vb.) görüntü işleme teknolojisiyle otomatik takip edilir.", link: "#" },
+            { id: 1203, company: "Turkish Airlines", product: "Seamless Journey", subCategory: "Yolcu Deneyimi", category: "Yer İşletme Çözümleri", description: "Yolcunun rezervasyondan boarding’e kadar tüm yolculuk süreci uçtan uca dijitalleşir. Otomatik check-in ve hatasız yolcu akışı sağlar.", link: "#" },
+            { id: 1204, company: "Turkish Airlines", product: "QC 2.0", subCategory: "Check-in Altyapısı", category: "Yer İşletme Çözümleri", description: "Quick Check-in işlemleri için yeni nesil, hızlı ve stabil servis altyapısı. Yüksek kullanıcı trafiğine uygun güçlü bir yapı.", link: "#" },
+            { id: 1205, company: "Turkish Airlines", product: "SPAS", subCategory: "Özel Yolcu Hizmetleri", category: "Yer İşletme Çözümleri", description: "Özel yolcu (VIP, CIP, engelli vb.) süreçlerinin sistem üzerinden yönetilmesini ve AirClinic personeline otomatik görevlendirme yapılmasını sağlar.", link: "#" },
+            { id: 1206, company: "Turkish Airlines", product: "Delay Prediction", subCategory: "Yapay Zeka", category: "Yer İşletme Çözümleri", description: "Tehir (delay) tahmini yapar. Gecikmeye sebep olan süreçleri analiz ederek raporlar ve proaktif aksiyon alınmasını sağlar.", link: "#" },
+            { id: 1207, company: "Turkish Airlines", product: "INAD Prediction Tool", subCategory: "Güvenlik & Risk", category: "Yer İşletme Çözümleri", description: "Ülkeye giriş yapamayacak (INAD) yolcu olasılığını önceden tahmin eder. Operasyonu erken uyararak risk ve maliyetleri düşürür.", link: "#" },
+            { id: 1208, company: "Turkish Airlines", product: "HubNow", subCategory: "Operasyonel İzleme", category: "Yer İşletme Çözümleri", description: "HUB operasyonlarının anlık durumunu gösteren kapsamlı bir dashboard. Operasyon yönetimine net görünürlük sağlar.", link: "#" },
+            { id: 1209, company: "Turkish Airlines", product: "Transfer Bant Projesi", subCategory: "Bagaj Operasyonu", category: "Yer İşletme Çözümleri", description: "Transfer bagajları için doğru bant seçimini önerir. Kısa bağlantılı uçuşlarda bagajın yetişmeme riskini azaltır.", link: "#" },
+            { id: 1210, company: "Turkish Airlines", product: "COBOT", subCategory: "Yolcu Deneyimi", category: "Yer İşletme Çözümleri", description: "Kabin bagajı tahminlemesi yaparak boarding sürecindeki tıkanıklıkları önler. Sıra yönetimini iyileştirir.", link: "#" },
+            { id: 1211, company: "Turkish Airlines", product: "Gate & Runway Atama", subCategory: "Operasyonel Verimlilik", category: "Yer İşletme Çözümleri", description: "Yolcuların en uygun kapıya yönlendirilmesini optimize eder. Runway ataması ile yakıt ve taksi sürelerini azaltmayı amaçlar.", link: "#" },
+            { id: 1212, company: "Turkish Airlines", product: "Kişisel MBK", subCategory: "Yolcu Deneyimi", category: "Yer İşletme Çözümleri", description: "Mobil biniş kartlarının varış noktasına göre kişiselleştirilmiş temalarla oluşturulmasını sağlar.", link: "#" },
+            { id: 1213, company: "Turkish Airlines", product: "QC & TMAN Chatbot", subCategory: "Chatbot", category: "Yer İşletme Çözümleri", description: "Yolcu hizmetleri ve harekât operasyonu için geliştirilen yapay zekâ destekli chatbotlar.", link: "#" },
+
+            // --- MEVCUT VERİLER (TURKISH CARGO & DİĞERLERİ) ---
+            // TURKISH CARGO
+            { id: 101, company: "Turkish Cargo", product: "CARGY", subCategory: "Chatbot", category: "Müşteri Odaklı Çözümler", description: "AWB numarasıyla kargo durumu ve sefer bilgilerininin sorgulanabildiği yapay zekâ destekli chatbot", link: "https://terminal.turkishairlines.com/turkish-cargonun-yeni-dijital-cozum-ortagi-cargy/" },
+            { id: 102, company: "Turkish Cargo", product: "COMIS", subCategory: "ERP Süreçleri", category: "Operasyonel Verimlilik ve Takip", description: "Hava kargo ERP çözümü", link: "https://upload.eib.org.tr/20150512/00000000005512.pdf" },
+            { id: 103, company: "Turkish Cargo", product: "ACRM", subCategory: "Gelir Optimizasyonu", category: "Veri Analitiği ve Optimizasyon", description: "Yapay Zeka destekli hava kargo gelir optimizasyonu aracı", link: "https://www.turkishcargo.com/tr/hakkimizda/kurumsal/duyurular/turkish-cargo-yapay-zeka-destekli-gercek-zamanli-dinamik-fiyatlandirmaya-basliyor" },
+            { id: 104, company: "Turkish Cargo", product: "RPA", subCategory: "Süreç Dijitalleştirmesi", category: "Operasyonel Verimlilik ve Takip", description: "Çalışan verimliliği sağlayan RPA entegreli AI robotlar (Alpha, Bravo, Charlie ve Delta)", link: "https://www.aeroportist.com/turkish-cargo-dijitallesme-yatirimlarina-devam-ediyor/" },
+            { id: 105, company: "Turkish Cargo", product: "TK GO", subCategory: "Dijital Müşteri Portalı", category: "Müşteri Odaklı Çözümler", description: "Müşterilerin online işlemlerini yapabileceği yeni web portalı.", link: "https://www.aeroportist.com/turkish-cargo-yeni-web-portali-tk-go/" },
+            { id: 106, company: "Turkish Cargo", product: "CAPRON", subCategory: "Operasyonel İzleme", category: "Operasyonel Verimlilik ve Takip", description: "CAPRON platformu ve ULD kontur raporlaması, daha hassas apron koordinasyonu ve performans takibi sağlıyor", link: "https://aircargoweek.com/inside-turkish-cargos-digital-backbone/" },
+            { id: 107, company: "Turkish Cargo", product: "Turkish Airlines Terminal", subCategory: "Girişimci İşbirliği", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Girişimleri destekleyerek Turkish Airlines bünyesi ve paydaşlarına katkıda bulunulması", link: "https://terminal.turkishairlines.com/" },
+            { id: 108, company: "Turkish Cargo", product: "CargoWise", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Turkish Cargo, CargoWise entegrasyonu ile müşterilerine gerçek zamanlı fiyat, kapasite ve e-Rezervasyon hizmetleri sunarak lojistik süreçlerini dijitalleştiriyor.", link: "https://www.turkishcargo.com/tr/hakkimizda/kurumsal/haberler/turkish-cargo-cargowise-platformu-uzerinden-rezervasyon-hizmetleri-sunuyor" },
+            { id: 109, company: "Turkish Cargo", product: "cargo.one", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "cargo.one, dijital hava kargo rezervasyonlarının lider pazar yeri olan Turkish Cargo'yu bünyesine katan küresel bir ortaklık duyurdu.", link: "https://www.aviationturkey.com/en/content/turkish-cargo-selects-cargo-one-747" },
+            { id: 110, company: "Turkish Cargo", product: "cargoAI", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Turkish Cargo, CargoAi ile dijital rezervasyon hizmetini küresel çapta genişletiyor.", link: "https://aircargoweek.com/turkish-cargo-partners-with-cargoai-to-expand-its-digital-offering-worldwide/" },
+            { id: 111, company: "Turkish Cargo", product: "WebCargo", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Turkish Cargo, Freightos WebCargo platformunda kapasite satışıyla dijital hava kargo dönüşümünü hızlandırıyor.", link: "https://theloadstar.com/freightos-webcargo-signs-turkish-cargo-as-sectors-digital-age-advances/" },
+
+            // QATAR AIRWAYS CARGO
+            { id: 201, company: "Qatar Airways Cargo", product: "Digital Lounge", subCategory: "Dijital Müşteri Portalı", category: "Müşteri Odaklı Çözümler", description: "Online rezervasyon ve takip sunan platform.", link: "https://www.timesaerospace.aero/news/technology/qatar-airways-cargo-unveils-new-feature-on-its-digital-lounge-platform" },
+            { id: 202, company: "Qatar Airways Cargo", product: "CargoWise", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Qatar Airways Cargo CargoWise ile anlaşma sağlayarak yeni bir dijital satış kanalında yer aldı.", link: "https://www.securitycargonetwork.com/cargowise-new-data-connection-with-qatar-airways-cargo/" },
+            { id: 203, company: "Qatar Airways Cargo", product: "Microsoft Azure", subCategory: "Bulut Teknolojisi", category: "Veri Analitiği ve Optimizasyon", description: "Qatar Airways uygulama ve hosting servisleri için Microsoft Azure Bulut Hizmetlerini kullanıyor.", link: "https://www.appruntheworld.com/customers-database/purchases/view/qatar-airways-qatar-selects-microsoft-azure-cloud-services-for-application-hosting-and-computing-services" },
+            { id: 204, company: "Qatar Airways Cargo", product: "iNOMAD", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Güney Kore'deki müşteriler için oranların ve kapasitenin görünürlüğünü iyileştirmek amacıyla Güney Kore merkezli platform iNOMAD ile ortaklık.", link: "https://www.aircargonews.net/qatar-airways-cargo-partners-with-inomad-platform/1058734.article" },
+            { id: 205, company: "Qatar Airways Cargo", product: "CARGOSTACK", subCategory: "AI Çözümleri", category: "Veri Analitiği ve Optimizasyon", description: "Wiremind Cargo'nun Gelir Yönetimi paketi CARGOSTACK Optimiser'ı resmen piyasaya sürdü.", link: "https://www.qrcargo.com/s/company/press-releases/a0zP1000004upX1IAI/qr-cargo-goes-live-with-wiremind-cargos-cargostack-revenue-management-suite" },
+            { id: 206, company: "Qatar Airways Cargo", product: "QR Cargo", subCategory: "Telefon Uygulaması", category: "Müşteri Odaklı Çözümler", description: "Müşteriler mobil telefonlar üzerinden işlem yapma kolaylığı tanıyor.", link: "https://www.qrcargo.com/en-mm/press-releases/2016/Apr/pressrelease_qrcargoapp.html" },
+            { id: 207, company: "Qatar Airways Cargo", product: "ERL", subCategory: "AR/VR/MR Teknolojileri", category: "Operasyonel Verimlilik ve Takip", description: "Genişletilmiş Gerçeklik Yük Yöneticisi (ERL), insan yük yöneticilerinin güvenli uçuş dönüşlerini sağlamalarına yardımcı oluyor.", link: "https://www.linkedin.com/posts/qatar-airways-cargo_qrcargo-nextgeneration-movedbypeople-activity-7074379899357359016-FFF-" },
+            { id: 208, company: "Qatar Airways Cargo", product: "SAMA", subCategory: "Chatbot", category: "Müşteri Odaklı Çözümler", description: "Yapay zeka destekli dijital insan Sama'yı hava kargo sektörüne entegre ederek rezervasyon ve müşteri hizmetlerini verimli hale getiriyor.", link: "https://www.qrcargo.com/s/about-us/press-releases/a0zP100000AQMNMIA5/qr-cargo-to-showcase-sama-the-worlds-first-ai-digital-cabin-crew-at-ace-2025" },
+            { id: 209, company: "Qatar Airways Cargo", product: "vMail", subCategory: "Süreç Dijitalleştirmesi", category: "Operasyonel Verimlilik ve Takip", description: "50'den fazla istasyonda otomatik posta yönetim sistemi ve Descartes Velocity Mail (vMail) entegrasyonu.", link: "https://www.qatarairways.com/en/press-releases/2018/October/CargoMail.html" },
+            { id: 210, company: "Qatar Airways Cargo", product: "Siemens Logistics", subCategory: "Operasyonel İzleme", category: "Operasyonel Verimlilik ve Takip", description: "Yapay zeka ve veri analizi destekli kestirimci bakım içeren kargo elleçleme süreçlerini dijitalleştirme iş birliği.", link: "https://airportindustry-news.com/siemens-logistics-partners-with-qatar-airways-group-on-digitalising-cargo-handling/" },
+            { id: 211, company: "Qatar Airways Cargo", product: "FLYRS", subCategory: "AI Çözümleri", category: "Veri Analitiği ve Optimizasyon", description: "Kargo Tahmini ve Karar Alma İşlemlerini Optimize Etmek İçin FLYR'nin Gelir İşletim Sisteminden Yararlanacak.", link: "https://flyr.com/resource-hub/qatar-airways-cargo-to-utilize-flyr-ai-platform-in-strategic-partnership-for-cargo-optimization/" },
+            { id: 212, company: "Qatar Airways Cargo", product: "CROAMIS", subCategory: "ERP Süreçleri", category: "Operasyonel Verimlilik ve Takip", description: "Uçtan uca kargo yönetimi ürün paketi CROAMIS, ticari, operasyonel ve finansal işlevleri dönüştürüyor.", link: "https://www.wipro.com/travel-and-transportation/croamis/" },
+            { id: 213, company: "Qatar Airways Cargo", product: "TechLift", subCategory: "Genel", category: "Operasyonel Verimlilik ve Takip", description: "Büyüyen yarı iletken pazarını hedef alarak belirli dikey pazarlara yönelik ürün geliştirmesi.", link: "https://www.aircargonews.net/airlines/qatar-cargo-targets-semiconductors-with-latest-product/1079837.article" },
+            { id: 214, company: "Qatar Airways Cargo", product: "PROS", subCategory: "Dinamik Fiyatlandırma", category: "Veri Analitiği ve Optimizasyon", description: "Talebe dayalı dinamik fiyatlandırma.", link: "https://pros.com/learn/blog/qatar-airways-cargo-enhance-customer-experience-pros-pricing-solutions" },
+            { id: 215, company: "Qatar Airways Cargo", product: "ULD Digitalization", subCategory: "ULD Takip", category: "Operasyonel Verimlilik ve Takip", description: "ULD'lerin Unilode Aviation Solutions işbirliği ile dijitalleştirilmesi.", link: "https://www.stattimes.com/air-cargo/qatar-airways-cargo-unilode-announce-digitalisation-partnership-1354222" },
+            { id: 216, company: "Qatar Airways Cargo", product: "Unisys CPS Platform", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Yük ileticilerine kapasite satma, fiyatlandırma ve rezervasyon.", link: "https://www.unisys.com/news-release/qatar-airways-cargo-joins-unisys-cargo-portal-services-platform/" },
+
+            // EMIRATES SKYCARGO
+            { id: 301, company: "Emirates SkyCargo", product: "eQuote", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Gerçek zamanlı fiyatlandırma ve rezervasyon.", link: "https://www.skycargo.com/media-centre/emirates-skycargo-marks-next-milestone-in-its-digital-transformation-with-the-launch-of-equote/" },
+            { id: 302, company: "Emirates SkyCargo", product: "CargoAI", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Pazar yeri entegrasyonu ile müşteri erişimi.", link: "https://cargonow.world/emirates-skycargo-advances-its-digital-customer-experience-with-cargoai/" },
+            { id: 303, company: "Emirates SkyCargo", product: "SkyChain", subCategory: "Dijital Müşteri Portalı", category: "Müşteri Odaklı Çözümler", description: "Gerçek zamanlı kargo yönetimi.", link: "https://www.freightwaves.com/news/emirates-skycargo-launches-new-cargo-management-system" },
+            { id: 304, company: "Emirates SkyCargo", product: "cargo.one Ortaklığı", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Dijital rezervasyon platformu entegrasyonu.", link: "https://aircargoweek.com/emirates-skycargo-is-now-live-on-cargo-one/" },
+
+            // CATHAY PACIFIC CARGO
+            { id: 401, company: "Cathay Pacific Cargo", product: "Cathay Cargo App", subCategory: "Telefon Uygulaması", category: "Müşteri Odaklı Çözümler", description: "Gönderi takibi ve e-rezervasyon.", link: "https://supplychaindigital.com/logistics/cathay-pacific-launches-new-mobile-app-cargo-customers" },
+            { id: 402, company: "Cathay Pacific Cargo", product: "Blockchain ULD Yönetimi", subCategory: "ULD Takip", category: "Operasyonel Verimlilik ve Takip", description: "Blockchain ile ULD yönetimi.", link: "https://www.cathaycargo.com/en-us/stories/cargo-in-action/cathay-pacific-cargo-pushes-ahead-with-blockchain-uld-system.html" },
+            { id: 403, company: "Cathay Pacific Cargo", product: "eSRF", subCategory: "Süreç Dijitalleştirmesi", category: "Operasyonel Verimlilik ve Takip", description: "Yüz tanıma yoluyla erişilen, kuyruk beklemeyi ve evrak işlerini azaltan el terminali uygulaması.", link: "https://www.cathaycargo.com/en-us/stories/our-business/the-connected-and-soon-to-be-cashless-cargo-terminal.html" },
+            { id: 404, company: "Cathay Pacific Cargo", product: "CargoWise", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "cargo.one platformu ile anlaşma sağlayarak eBooking kapasitesini artırdı.", link: "https://news.cathaypacific.com/translation-cathay-cargo-brings-its-click-ship-booking-to-dhl-global-forwarding-and-dsv-via-the-cargowise-platform" },
+            { id: 405, company: "Cathay Pacific Cargo", product: "Intenseye", subCategory: "AI Çözümleri", category: "Operasyonel Verimlilik ve Takip", description: "AI entegreli CCTV altyapısıyla terminal binası güvenliği ve emniyet izlemesi.", link: "https://news.cathaypacific.com/cathay-cargo-terminal-takes-lead-in-ai-powered-safety-enhancements-lbmqq8" },
+            { id: 406, company: "Cathay Pacific Cargo", product: "Chatbot", subCategory: "Chatbot", category: "Müşteri Odaklı Çözümler", description: "Müşteri deneyimini geliştirmek için yeni bir sohbet robotu.", link: "https://www.cathaycargo.com/en-us/stories/our-business/with-new-tech-its-good-to-chat.html" },
+            { id: 407, company: "Cathay Pacific Cargo", product: "Amazon AWS", subCategory: "Bulut Teknolojisi", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Bulut tabanlı iş yükü optimizasyonu.", link: "https://www.cio.com/article/1287811/cathay-pacific-to-take-cloud-journey-to-new-heights.html" },
+            { id: 408, company: "Cathay Pacific Cargo", product: "IATA ONE Record", subCategory: "Uyumluluklar", category: "Operasyonel Verimlilik ve Takip", description: "Veri paylaşım protokolü.", link: "https://www.cathaycargo.com/en-us/stories/our-business/iata-one-record-data-exchange.html" },
+            { id: 409, company: "Cathay Pacific Cargo", product: "VR Training", subCategory: "AR/VR/MR Teknolojileri", category: "Operasyonel Verimlilik ve Takip", description: "VR teknolojisi sayesinde rampa operasyonu eğitimlerini risksiz ve etkili bir biçimde gerçekleştiriyor.", link: "https://www.lscm.hk/eng/channel.php?channel=case-1-2" },
+            { id: 410, company: "Cathay Pacific Cargo", product: "Ultra Track", subCategory: "Operasyonel Takip", category: "Operasyonel Verimlilik ve Takip", description: "BLE teknolojisi ile anlık takip.", link: "https://news.cathaypacific.com/cathay-pacific-cargo-rolls-out-ultra-track-worldwide-v3klk8" },
+
+            // LUFTHANSA CARGO
+            { id: 501, company: "Lufthansa Cargo", product: "GetCapacity API", subCategory: "API Çözümleri", category: "Müşteri Odaklı Çözümler", description: "Gerçek zamanlı kapasite ve oran verisi.", link: "https://www.lufthansa-cargo.com/en/-/lufthansa-cargo-expanding-its-range-of-digital-services" },
+            { id: 502, company: "Lufthansa Cargo", product: "iPartner Handling", subCategory: "Süreç Dijitalleştirmesi", category: "Operasyonel Verimlilik ve Takip", description: "Özel ürün ve hizmetler için kritik elleçleme süreçlerini dijitalleştirmek amacıyla IBS Software ile ortaklık.", link: "https://www.airportsinternational.com/article/lufthansa-cargo-makes-digital-move" },
+            { id: 503, company: "Lufthansa Cargo", product: "3Spin Dream AR/VR", subCategory: "AR/VR/MR Teknolojileri", category: "Operasyonel Verimlilik ve Takip", description: "AR/VR teknolojisi sayesinde çalışanlara eğitim verilmesi.", link: "https://vrbusiness.club/best-practice-how-lufthansa-cargo-creates-and-distributes-scalable-ar-vr-training-without-programming-with-3spin-dream-members-only?lang=en" },
+            { id: 504, company: "Lufthansa Cargo", product: "Global Aviation Cloud", subCategory: "Bulut Teknolojisi", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Google Cloud ve Microsoft Azure ile ortaklık.", link: "https://www.lhsystems.com/solutions/ai-other-services/global-aviation-cloud" },
+            { id: 505, company: "Lufthansa Cargo", product: "DGD.online", subCategory: "Süreç Dijitalleştirmesi", category: "Operasyonel Verimlilik ve Takip", description: "Tehlikeli madde süreçlerini dijitalleştiren bulut uygulaması.", link: "https://www.lufthansa-cargo.com/en/-/lufthansa-cargo-further-expands-digital-offering" },
+            { id: 506, company: "Lufthansa Cargo", product: "Lufthansa Cargo App", subCategory: "Telefon Uygulaması", category: "Müşteri Odaklı Çözümler", description: "Müşteri işlemlerini mobilleştirerek hızlandıran telefon uygulaması.", link: "https://www.lufthansa-cargo.com/en/eservices-app" },
+            { id: 507, company: "Lufthansa Cargo", product: "Digital Twin", subCategory: "Operasyonel İzleme", category: "Operasyonel Verimlilik ve Takip", description: "Sanal kopya ile simülasyon ve optimizasyon sağlanması.", link: "https://www.lufthansa-industry-solutions.com/de-en/solutions-products/transport-logistics/optimize-reality-with-the-digital-twin" },
+            { id: 508, company: "Lufthansa Cargo", product: "Elektrikli Araç", subCategory: "Araç Elektrifikasyonu", category: "Operasyonel Verimlilik ve Takip", description: "Toplamda 30 aracın kademeli olarak elektrikli araçlarla değiştirilmesi.", link: "https://www.airporthaber2.com/havacilik-haberleri/lufthansa-cargodan-elektrikli-araclara-gecis-karari.html" },
+            { id: 509, company: "Lufthansa Cargo", product: "eAWB", subCategory: "Uyumluluklar", category: "Operasyonel Verimlilik ve Takip", description: "Kargo belgelerinin dijital ortamda yönetimi ve iş akışının otomasyonu.", link: "https://www.mynewsdesk.com/lufthansa-cargo-ag/pressreleases/lufthansa-cargo-now-only-flies-with-electronic-air-waybills-3162773" },
+            { id: 510, company: "Lufthansa Cargo", product: "Digital Hangar", subCategory: "Girişimci İşbirliği", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Dijital ürünler geliştirmek için işlevler arası birim.", link: "https://www.cio.com/article/656815/lufthansas-digital-future-takes-flight-with-digital-hangar.html" },
+            { id: 511, company: "Lufthansa Cargo", product: "cargo.one", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Platform ortaklığı ile eBooking kapasite artışı.", link: "https://www.lufthansa-cargo.com/en/-/lufthansa-cargo-markets-air-cargo-capacities-on-the-spot-market-using-the-digital-platform-cargo-one" },
+            { id: 512, company: "Lufthansa Cargo", product: "WebCargo", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Platform ortaklığı ile eBooking kapasite artışı.", link: "https://www.webcargo.co/airline/lufthansa/" },
+            { id: 513, company: "Lufthansa Cargo", product: "cargowise", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Platform ortaklığı ile eBooking kapasite artışı.", link: "https://www.cargowise.com/news/lufthansa-cargo-and-wisetech-global-to-launch-ebooking-connection/" },
+            { id: 514, company: "Lufthansa Cargo", product: "RSE", subCategory: "Gelir Paylaşım Motoru", category: "Veri Analitiği ve Optimizasyon", description: "CONVOTIS ile anlaşarak gelir paylaşımı motorunun canlıya alınması.", link: "https://www.convotis.com/en/success-story-lufthansa-cargo_en/" },
+            { id: 515, company: "Lufthansa Cargo", product: "Shipply.Vision Truck", subCategory: "Operasyonel Takip", category: "Operasyonel Verimlilik ve Takip", description: "Kurye gönderilerini gerçek zamanlı takip etme.", link: "https://www.champ.aero/news-events/press-releases/lufthansa-technik-logistik-services-enhances-visibility-and-improves-customer-satisfaction-through-champ-cargosystems-shipply.vision-truck" },
+
+            // CARGOLUX
+            { id: 601, company: "Cargolux", product: "my.cargolux.com", subCategory: "Dijital Müşteri Portalı", category: "Müşteri Odaklı Çözümler", description: "Fiyatlandırma ve rezervasyon için satış dijitalleşmesi.", link: "https://www.cargolux.com/media/media-releases/2022/cargolux-unveils-brand-new-customer-portal/" },
+            { id: 602, company: "Cargolux", product: "Platform Ortaklıkları", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "cargo.one, CargoAi ve WebCargo dijital rezervasyon platformları.", link: "https://www.heavyliftpfi.com/business/cargolux-joins-cargoone-cargoai-and-webcargo-digital-marketplaces/32962.article" },
+            { id: 603, company: "Cargolux", product: "eULD-Unilode", subCategory: "ULD Takip", category: "Operasyonel Verimlilik ve Takip", description: "Elektronik ULD takibi.", link: "https://www.aircargonews.net/cargolux-renews-partnership-with-unilode/1078172.article" },
+            { id: 604, company: "Cargolux", product: "Microsoft Azure", subCategory: "Bulut Teknolojisi", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Bulut tabanlı optimizasyon.", link: "https://www.codit.eu/en/clients/cargolux-optimizes-workflow-and-improves-customer-service-with-microsoft-azure/" },
+            { id: 605, company: "Cargolux", product: "iCargo CTO", subCategory: "Kargo Takip", category: "Operasyonel Verimlilik ve Takip", description: "Gerçek zamanlı veri yakalama için iCargo Kargo Terminal Operasyonları sistemi.", link: "https://www.aircargonews.net/technology/ibs-to-speed-luxcargo-handlings-digital-journey/1080689.article" },
+
+            // KOREAN AIR CARGO
+            { id: 701, company: "Korean Air Cargo", product: "DHL API Connection", subCategory: "API Çözümleri", category: "Müşteri Odaklı Çözümler", description: "CargoWise üzerinden DHL ile API Entegrasyonu.", link: "https://www.aircargonews.net/korean-air-connects-with-dhl-through-apis/1069545.article" },
+            { id: 702, company: "Korean Air Cargo", product: "iCargo", subCategory: "ERP Süreçleri", category: "Operasyonel Verimlilik ve Takip", description: "Otomatik iş akışları ile verimlilik.", link: "https://www.aircargonews.net/korean-air-cargo-continues-with-its-digital-development/1022869.article" },
+            { id: 703, company: "Korean Air Cargo", product: "Amazon AWS", subCategory: "Bulut Teknolojisi", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "BT altyapısının Amazon Web Services (AWS) göçü.", link: "https://shubhamjangid532.medium.com/how-korean-air-lines-benefited-from-aws-883d43fd3afa" },
+            { id: 704, company: "Korean Air Cargo", product: "AI Contact Center", subCategory: "Müşteri Hizmetleri", category: "Müşteri Odaklı Çözümler", description: "AWS ile AI destekli Müşteri Hizmetleri Platformu.", link: "https://www.airlineratings.com/articles/korean-air-to-build-ai-contact-center" },
+            { id: 705, company: "Korean Air Cargo", product: "Amazon Managed Blockchain", subCategory: "Operasyonel Takip", category: "Operasyonel Verimlilik ve Takip", description: "Aşı taşımacılığında güvenilir bilgi akışı için blockchain.", link: "https://aws.amazon.com/tr/blogs/web3/how-korean-air-succeeded-in-managing-the-vaccine-cold-chain-with-amazon-managed-blockchain/" },
+            { id: 706, company: "Korean Air Cargo", product: "KE Cargo", subCategory: "Telefon Uygulaması", category: "Müşteri Odaklı Çözümler", description: "Müşteri işlemlerini mobilden yürütmek için uygulama.", link: "https://cargo.koreanair.com/en/cargo-news/introduction-notice-mobile-application-korean-air-cargo" },
+            { id: 707, company: "Korean Air Cargo", product: "IBS Software", subCategory: "ERP Süreçleri", category: "Operasyonel Verimlilik ve Takip", description: "iCargo entegrasyonu için iş birliği.", link: "https://www.ibsplc.com/case-studies/air-cargo-solutions/helping-korean-air-cargo-go-digital-with-icargo" },
+
+            // AIR FRANCE KLM
+            { id: 801, company: "Air France KLM Cargo", product: "myCargo Platformu", subCategory: "Dijital Müşteri Portalı", category: "Müşteri Odaklı Çözümler", description: "Çevrimiçi rezervasyon ve hizmet merkezi.", link: "https://www.aircargonews.net/afklm-cargo-upgrades-its-mycargo-platform/1060945.article" },
+            { id: 802, company: "Air France KLM Cargo", product: "Dinamik Fiyatlandırma", subCategory: "Dinamik Fiyatlandırma", category: "Veri Analitiği ve Optimizasyon", description: "Yapay zeka ile gerçek zamanlı fiyatlandırma.", link: "https://www.aircargonews.net/dynamic-pricing-arrives-in-air-cargo-with-af-klm-and-webcargo/1021848.article" },
+            { id: 803, company: "Air France KLM Cargo", product: "SkyMind", subCategory: "ULD Takip", category: "Operasyonel Verimlilik ve Takip", description: "SkyCell'in SkyMind ürünü ile ULD takibi.", link: "https://www.aircargonews.net/afklmp-partners-with-skycell-on-ulds/1067250.article" },
+            { id: 804, company: "Air France KLM Cargo", product: "Accenture Cloud", subCategory: "Bulut Teknolojisi", category: "Veri Analitiği ve Optimizasyon", description: "Cloud Migration hizmeti için Accenture iş birliği.", link: "https://www.airwaysmag.com/new-post/air-france-klms-digital-stack-to-the-cloud" },
+            { id: 805, company: "Air France KLM Cargo", product: "Accenture AFLS", subCategory: "Dinamik Fiyatlandırma", category: "Veri Analitiği ve Optimizasyon", description: "Rezervasyon ve fiyatlandırma sistemi.", link: "https://newsroom.accenture.com/news/2013/air-france-klm-martinair-cargo-implements-accenture-air-cargo-reservations-software-to-improve-customer-service-and-optimize-capacity" },
+            { id: 806, company: "Air France KLM Cargo", product: "360° CRM", subCategory: "CRM Platformları", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Salesforce & Vonage ile müşteri hizmeti iş birliği.", link: "https://www.afklcargo.com/WW/en/common/news/salesforce_vonage.jsp" },
+
+            // CHINA CARGO AIRLINES
+            { id: 901, company: "China Cargo Airlines", product: "iCargo", subCategory: "ERP Süreçleri", category: "Operasyonel Verimlilik ve Takip", description: "Müşteri odaklı kargo yönetimi çözümü.", link: "https://www.aircargonews.net/technology/china-airlines-implements-ibs-softwares-icargo/1074816.article" },
+            { id: 902, company: "China Cargo Airlines", product: "SAF Anlaşması", subCategory: "SAF Anlaşmaları", category: "Teknolojik İş Birlikleri ve Yenilikler", description: "Morrison Express ile SAF kullanımını destekleyen ortaklık.", link: "https://cargo.china-airlines.com/ccnetv2/content/about/NewsView.aspx?id=96" },
+
+            // CHINA SOUTHERN
+            { id: 1001, company: "China Southern Cargo", product: "WebCargo", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Gerçek zamanlı oranlar ve e-rezervasyonlar.", link: "https://www.globaltrademag.com/webcargo-china-southern-air-logistics-becomes-first-chinese-carrier-to-offer-china-import-ebookings/" },
+
+            // ETIHAD CARGO
+            { id: 1101, company: "Etihad Cargo", product: "Cargo Eye - Assemble", subCategory: "AI Çözümleri", category: "Operasyonel Verimlilik ve Takip", description: "Speedcargo'nun yapay zeka (AI) tabanlı çözümleri.", link: "https://www.etihadcargo.com/en/news/etihad-cargo-launches-ai-powered-solutions-to-drive-innovative-cargo-services-in-singapore-in-partnership-with-dnata-and-speedcargo" },
+            { id: 1102, company: "Etihad Cargo", product: "Etihad Cargo App", subCategory: "Telefon Uygulaması", category: "Müşteri Odaklı Çözümler", description: "Müşteri deneyimini mobilleştiren uygulama.", link: "https://www.etihad.com/en/help/mobile-apps" },
+            { id: 1103, company: "Etihad Cargo", product: "Etihad Cargo IOR", subCategory: "Dinamik Fiyatlandırma", category: "Veri Analitiği ve Optimizasyon", description: "Müşterilere daha hızlı yanıt süreleri ve rekabetçi fiyatlar sunma imkanı.", link: "https://www.etihadcargo.com/en/news/etihad-cargo-launches-innovative-pricing-solution-to-streamline-booking-process" },
+            { id: 1104, company: "Etihad Cargo", product: "Sales Cockpit", subCategory: "Dijital Satış Optimizasyonu", category: "Veri Analitiği ve Optimizasyon", description: "Satış optimizasyonu için veri analitiği.", link: "https://www.etihadcargo.com/en/news/etihad-cargo-supercharges-customer-service-with-launch-of-digital-sales-optimisation-tool" },
+            { id: 1105, company: "Etihad Cargo", product: "Awery ERP", subCategory: "ERP Süreçleri", category: "Operasyonel Verimlilik ve Takip", description: "Etihad Cargo ERP süreçlerini Awery ile sürdürüyor.", link: "https://www.etihadcargo.com/en/news/etihad-cargo-streamlines-charter-operations-in-partnership-with-awery" },
+            { id: 1106, company: "Etihad Cargo", product: "SecureTech", subCategory: "Operasyonel İzleme", category: "Operasyonel Verimlilik ve Takip", description: "Hassas kargolar için güvenlik ve izleme.", link: "https://www.etihadcargo.com/en/news/etihad-cargo-securetech-to-make-transportation-of-consumer-electronics-safer" },
+            { id: 1107, company: "Etihad Cargo", product: "Descartes BLE", subCategory: "ULD Takip", category: "Operasyonel Verimlilik ve Takip", description: "BLE teknolojisi ile anlık ULD takibi.", link: "https://www.aircargonews.net/etihad-cargo-improves-shipment-visibility-with-bluetooth-low-energy/1068918.article" },
+            { id: 1108, company: "Etihad Cargo", product: "WebCargo", subCategory: "Dijital Satış Kanalı", category: "Müşteri Odaklı Çözümler", description: "Kapasiteye anında erişim sağlayan entegrasyon.", link: "https://theloadstar.com/etihad-joins-webcargo-as-air-cargos-digital-transformation-develops/" },
+            { id: 1109, company: "Etihad Cargo", product: "SmartTrack", subCategory: "Kargo Takip", category: "Operasyonel Verimlilik ve Takip", description: "Hücresel, GPS ve Wi-Fi bağlantısı ile canlı konum ve durum izleme.", link: "https://www.etihadcargo.com/en/news/etihad-cargo-launches-smarttrack-first-of-its-kind-realtime-shipment-visibility-service" }
+        ];
+
+        // Kategoriler Listesi
+        const CATEGORIES = [
+            "Müşteri Odaklı Çözümler",
+            "Operasyonel Verimlilik ve Takip",
+            "Veri Analitiği ve Optimizasyon",
+            "Teknolojik İş Birlikleri ve Yenilikler",
+            "Yer İşletme Çözümleri"
+        ];
+
+        const App = () => {
+            // State Yönetimi
+            const [activeTab, setActiveTab] = useState("category"); // 'category' veya 'company'
+            const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
+            const [selectedCompany, setSelectedCompany] = useState(null);
+            
+            // İç Filtreler
+            const [filterSubCat, setFilterSubCat] = useState("Tümü");
+            const [filterComp, setFilterComp] = useState("Tümü");
+
+            // Benzersiz Firmaları Çıkar (Alphabetical)
+            const companies = useMemo(() => {
+                const comps = [...new Set(rawData.map(item => item.company))];
+                return comps.sort();
+            }, []);
+
+            // Benzersiz Alt Kategorileri Çıkar (Seçili Kategoriye Göre)
+            const subCategories = useMemo(() => {
+                if (activeTab === 'category') {
+                    const filtered = rawData.filter(item => item.category === selectedCategory);
+                    return ["Tümü", ...new Set(filtered.map(item => item.subCategory))];
+                }
+                return [];
+            }, [selectedCategory, activeTab]);
+
+            // Kategori değişiminde filtreleri sıfırla
+            useEffect(() => {
+                setFilterSubCat("Tümü");
+                setFilterComp("Tümü");
+            }, [selectedCategory, activeTab]);
+
+            // Verileri Filtreleme Mantığı
+            const filteredData = useMemo(() => {
+                let data = rawData;
+
+                if (activeTab === 'category') {
+                    // Ana Kategori Filtresi
+                    data = data.filter(item => item.category === selectedCategory);
+                    
+                    // İç Filtreler (Firma ve Alt Kategori)
+                    if (filterComp !== "Tümü") {
+                        data = data.filter(item => item.company === filterComp);
+                    }
+                    if (filterSubCat !== "Tümü") {
+                        data = data.filter(item => item.subCategory === filterSubCat);
+                    }
+                } else if (activeTab === 'company') {
+                    // Firma Bazlı Arama Modu
+                    if (selectedCompany) {
+                        data = data.filter(item => item.company === selectedCompany);
+                    } else {
+                        data = [];
+                    }
+                }
+
+                return data;
+            }, [activeTab, selectedCategory, selectedCompany, filterSubCat, filterComp]);
+
+            // İkonları yükle
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            });
+
+            return (
+                <div className="flex h-screen overflow-hidden text-[#333]">
+                    
+                    {/* SOL SIDEBAR */}
+                    <aside className="w-80 bg-[#850101] text-white flex flex-col shadow-2xl z-20 shrink-0">
+                        {/* Logo Alanı - Güncellendi (Beyaz Arka Plan) */}
+                        <div className="h-44 flex flex-col items-center justify-center border-b border-[#A01010] bg-white relative p-6">
+                            {/* Güncellenmiş Logo - Filtre Kaldırıldı */}
+                            <img 
+                                src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Turkish_Cargo_logo.svg" 
+                                alt="Turkish Cargo Logo" 
+                                className="h-auto w-full max-w-[180px] object-contain"
+                            />
+                            <p className="mt-3 text-[11px] font-bold tracking-widest uppercase text-[#850101] border-t border-gray-100 pt-2 w-full text-center">Dijitalleşme Rakip Analizi</p>
+                        </div>
+
+                        {/* Menü İçeriği */}
+                        <div className="flex-1 overflow-y-auto custom-scroll p-6 space-y-10">
+                            
+                            {/* Kategori Bölümü */}
+                            <div>
+                                <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-4">
+                                    Kategoriler
+                                </h3>
+                                <div className="space-y-2">
+                                    {CATEGORIES.map((cat) => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => {
+                                                setActiveTab('category');
+                                                setSelectedCategory(cat);
+                                            }}
+                                            className={`w-full flex items-center px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-300 group ${
+                                                activeTab === 'category' && selectedCategory === cat
+                                                    ? 'sidebar-link-active'
+                                                    : 'text-gray-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+                                            }`}
+                                        >
+                                            <span className="mr-3">
+                                                <i data-lucide="chevron-right" className={`w-4 h-4 ${activeTab === 'category' && selectedCategory === cat ? 'text-[#850101]' : ''}`}></i>
+                                            </span>
+                                            <span className="text-left leading-tight">{cat}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Firma Arama Bölümü */}
+                            <div>
+                                <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-4 flex items-center">
+                                    <i data-lucide="search" className="w-3 h-3 mr-2"></i>
+                                    Firma Bazlı Arama
+                                </h3>
+                                <div className="relative group">
+                                    <select 
+                                        className="w-full bg-[#600000] text-white text-sm rounded-lg border border-[#A01010] focus:ring-1 focus:ring-white focus:border-white block p-3 outline-none cursor-pointer hover:bg-[#700000] transition-colors appearance-none"
+                                        onChange={(e) => {
+                                            if(e.target.value) {
+                                                setActiveTab('company');
+                                                setSelectedCompany(e.target.value);
+                                            }
+                                        }}
+                                        value={activeTab === 'company' && selectedCompany ? selectedCompany : ""}
+                                    >
+                                        <option value="" disabled>Firma Seçiniz...</option>
+                                        {companies.map(comp => (
+                                            <option key={comp} value={comp}>{comp}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                        <i data-lucide="chevron-down" className="w-4 h-4 text-gray-400"></i>
+                                    </div>
+                                </div>
+                                {activeTab === 'company' && selectedCompany && (
+                                    <div className="mt-4 p-4 bg-white/10 rounded-lg border border-white/20 animate-fade-in">
+                                        <p className="text-xs text-white/60 mb-1">Görüntülenen Firma:</p>
+                                        <p className="font-bold text-white text-lg tracking-wide">{selectedCompany}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+                    </aside>
+
+                    {/* ANA İÇERİK ALANI */}
+                    <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#F3F4F6] relative">
+                        
+                        {/* Başlık Alanı (Header) */}
+                        <header className="bg-white border-b border-gray-200 px-10 py-6 flex justify-between items-center shadow-sm z-10 sticky top-0">
+                            <div>
+                                <h1 className="text-2xl font-bold text-[#05014A] tracking-tight">
+                                    {activeTab === 'category' ? selectedCategory : `${selectedCompany}`}
+                                </h1>
+                                <p className="text-sm font-medium text-gray-500 mt-2">
+                                    {activeTab === 'category' 
+                                        ? "Sektörel benchmark analizi ve dijital çözümler." 
+                                        : "Firmaya ait tüm kategorilerdeki dijitalleşme haberleri."}
+                                </p>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <span className="px-4 py-1.5 bg-[#850101]/5 text-[#850101] rounded-full text-xs font-bold border border-[#850101]/10">
+                                    {filteredData.length} Kayıt Bulundu
+                                </span>
+                            </div>
+                        </header>
+
+                        {/* Filtre Barı (Sadece Kategori Görünümünde) */}
+                        {activeTab === 'category' && (
+                            <div className="bg-white px-10 py-4 border-b border-gray-200 flex flex-wrap gap-4 items-center shadow-sm">
+                                <div className="flex items-center space-x-2 mr-2">
+                                    <span className="text-sm font-bold text-gray-600 flex items-center uppercase tracking-wide text-xs">
+                                        <i data-lucide="filter" className="w-3 h-3 mr-1.5"></i>
+                                        Filtrele:
+                                    </span>
+                                </div>
+                                
+                                {/* Firma Filtresi */}
+                                <select 
+                                    className="bg-gray-50 border border-gray-300 text-[#05014A] text-sm rounded-md focus:ring-[#850101] focus:border-[#850101] block p-2.5 font-medium outline-none min-w-[200px]"
+                                    value={filterComp}
+                                    onChange={(e) => setFilterComp(e.target.value)}
+                                >
+                                    <option value="Tümü">Tüm Firmalar</option>
+                                    {companies.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+
+                                {/* Alt Kategori Filtresi */}
+                                <select 
+                                    className="bg-gray-50 border border-gray-300 text-[#05014A] text-sm rounded-md focus:ring-[#850101] focus:border-[#850101] block p-2.5 font-medium outline-none min-w-[200px]"
+                                    value={filterSubCat}
+                                    onChange={(e) => setFilterSubCat(e.target.value)}
+                                >
+                                    {subCategories.map(sc => <option key={sc} value={sc}>{sc}</option>)}
+                                </select>
+
+                                {(filterComp !== "Tümü" || filterSubCat !== "Tümü") && (
+                                    <button 
+                                        onClick={() => { setFilterComp("Tümü"); setFilterSubCat("Tümü"); }}
+                                        className="text-xs font-bold text-[#850101] hover:text-[#500000] ml-auto flex items-center bg-gray-100 px-3 py-2 rounded-md transition-colors"
+                                    >
+                                        <i data-lucide="x" className="w-3 h-3 mr-1"></i>
+                                        TEMİZLE
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* İçerik Grid */}
+                        <div className="flex-1 overflow-y-auto p-10 custom-scroll bg-[#F3F4F6]">
+                            {filteredData.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 pb-10">
+                                    {filteredData.map((item) => (
+                                        <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover-card flex flex-col overflow-hidden h-full group relative">
+                                            
+                                            {/* Üst Çizgi (Renk Ayrımı) */}
+                                            <div className={`h-1.5 w-full ${item.company === "Turkish Cargo" || item.company === "Turkish Airlines" ? 'bg-[#850101]' : 'bg-[#635F5F]'}`}></div>
+                                            
+                                            <div className="p-6 flex flex-col flex-1">
+                                                {/* Firma Rozeti */}
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                                        item.company === "Turkish Cargo" || item.company === "Turkish Airlines" 
+                                                            ? "bg-[#850101]/10 text-[#850101]" 
+                                                            : "bg-gray-100 text-[#635F5F]"
+                                                    }`}>
+                                                        {item.company}
+                                                    </span>
+                                                    {/* Link Butonu */}
+                                                    <a href={item.link} target="_blank" className={`transition-colors p-1 rounded-full ${item.link !== '#' ? 'text-gray-400 hover:text-[#850101] hover:bg-gray-100 cursor-pointer' : 'text-gray-200 cursor-not-allowed'}`} title={item.link !== '#' ? "Kaynağa Git" : "Link Mevcut Değil"}>
+                                                        <i data-lucide="external-link" className="w-4 h-4"></i>
+                                                    </a>
+                                                </div>
+
+                                                {/* Ürün & Alt Kategori */}
+                                                <div className="mb-3">
+                                                    <h3 className="text-[#05014A] font-bold text-lg leading-snug mb-1">{item.product || item.subCategory}</h3>
+                                                    {item.product && <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{item.subCategory}</p>}
+                                                </div>
+                                                
+                                                {/* Açıklama */}
+                                                <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-1">
+                                                    {item.description}
+                                                </p>
+
+                                                {/* Alt Bilgi */}
+                                                <div className="pt-4 border-t border-gray-100 mt-auto">
+                                                    <div className="flex items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                        <i data-lucide="tag" className="w-3 h-3 mr-1.5"></i>
+                                                        {item.category.split(' ')[0]}...
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                                    <div className="bg-white p-6 rounded-full shadow-sm mb-4">
+                                        <i data-lucide="search-x" className="w-10 h-10 text-gray-300"></i>
+                                    </div>
+                                    <p className="text-xl font-bold text-[#05014A]">Kayıt Bulunamadı</p>
+                                    <p className="text-sm text-gray-500 mt-1">Lütfen filtrelerinizi kontrol edin.</p>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
